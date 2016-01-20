@@ -2,7 +2,6 @@ package commands;
 
 import java.util.Map.Entry;
 
-import data.Packet;
 import server.ClientThread;
 import server.Database;
 
@@ -64,12 +63,6 @@ public class UserCommands implements Command {
 
 	@Override
 	public void noOfWarnings() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void sendToAll(Packet packet) {
 		// TODO Auto-generated method stub
 		
 	}

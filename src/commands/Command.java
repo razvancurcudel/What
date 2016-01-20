@@ -1,7 +1,5 @@
 package commands;
 
-import data.Packet;
-
 /**
  * @author Curcudel Ioan-Razvan
  */
@@ -13,7 +11,6 @@ public interface Command {
 	public void noOfUsersOn();
 	public void noOfAdminsOn();
 	public void noOfWarnings();
-	public void sendToAll(Packet packet);
 	
 	public void kick(String user);
 }

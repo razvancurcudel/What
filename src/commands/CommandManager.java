@@ -39,7 +39,6 @@ public class CommandManager {
 		switch (tokens[0]) {
 
 			case "stop":
-				client.setRunning(false);
 				toClient.writeObject(new Packet("\\Stop", "String"));
 				toClient.flush();
 				break;
@@ -103,15 +102,6 @@ public class CommandManager {
 				command.kick(tokens[1]);
 				break;
 
-			case "all":
-				String message = "";
-				for(int i = 1; i<tokens.length; ++i) {
-					message += tokens[i] + " ";
-				}
-				System.out.println(message);
-				command.sendToAll(new Packet(message, "String"));
-				break;
-				
 			default:
 				System.out.println("invalid command");
 				break;
