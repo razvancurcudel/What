@@ -125,23 +125,11 @@ public class Client {
 			t.start();
 
 			while (true) {
-				// System.out.print("Waiting for input: ");
-				// String input = inFromUser.readLine();
-				// toServer.writeObject(new Packet(input, "String"));
 				Object response = fromServer.readObject();
 				if (response != null) {
 					Packet packet = (Packet) response;
-					if (((String) packet.data).equals("\\Stop")) {
-						System.exit(0);
-						listener.terminate();
-						t.interrupt();
-						break;
-					}
 					System.out.println("Here is the response: " + packet.data);
 				}
-				// if (input.equals("\\Stop")) {
-				// break;
-				// }
 			}
 		} catch (EOFException e) {
 			System.out.println("EOF in client");
