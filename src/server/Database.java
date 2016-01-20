@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+
+import data.UserCredentials;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -23,6 +26,8 @@ public class Database {
 
 	public Hashtable<String, ClientThread>	usersOn			= null;
 
+	public ArrayList<UserCredentials>		online			= null; //TODO make this private
+
 	public static Database getInstance() {
 		if (instance == null) {
 			instance = new Database();
@@ -40,6 +45,7 @@ public class Database {
 		users = new Hashtable<String, String>();
 		admins = new Hashtable<String, String>();
 		usersOn = new Hashtable<String, ClientThread>();
+		online = new ArrayList<UserCredentials>();
 		updateDatabase(true, true);
 	}
 
