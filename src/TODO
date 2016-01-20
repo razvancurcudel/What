@@ -6,10 +6,11 @@ TODO:
 -add privilege level: guest, user, admin
 -passwords must be between 8 and 32 chars long
 -crypt passwords
--sent message to all users
--add a blocking queue in every thread for packets
-- pricipal theard wait for objects, second thread write object
-
+-send private message
+-disconnect user and close all things
+-keep admins in an array
+-create root user 
+-create posibility to change password
 
 -add window listener..to disconnect when windows is closing
 -make sign-up, log-in and main screen
