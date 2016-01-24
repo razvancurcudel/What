@@ -1,15 +1,15 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import data.Packet;
+import data.TYPE;
 import data.UserCredentials;
 
 /**
@@ -18,15 +18,17 @@ import data.UserCredentials;
 
 public class Client {
 
-	private static final String	HOST		= "localhost";
-	private static final int	PORT		= 1234;
+	public static final String	HOST		= "localhost";
+	public static final int		PORT		= 1234;
 
 	private Socket				socket		= null;
 	private ObjectInputStream	fromServer	= null;
 	private ObjectOutputStream	toServer	= null;
-	private BufferedReader		inFromUser	= null;
 
-	private void connect(String host, int port) {
+	public ListenerThread		listener	= null;
+	public Queue<Packet>		messages	= null;
+
+	public void connect(String host, int port) {
 
 		System.out.println("Trying to connect");
 
@@ -44,7 +46,7 @@ public class Client {
 		try {
 			toServer = new ObjectOutputStream(socket.getOutputStream());
 			fromServer = new ObjectInputStream(socket.getInputStream());
-			inFromUser = new BufferedReader(new InputStreamReader(System.in));
+			messages = new LinkedList<>();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -52,14 +54,6 @@ public class Client {
 
 	private void disconnect() {
 		System.out.println("Closing stuffs");
-		try {
-			if (inFromUser != null) {
-				inFromUser.close();
-				inFromUser = null;
-			}
-		} catch (IOException e) {
-			inFromUser = null;
-		}
 		try {
 			if (socket != null) {
 				socket.close();
@@ -86,96 +80,55 @@ public class Client {
 		}
 	}
 
-	private UserCredentials getLogInDetails() {
-		UserCredentials logInDetails = null;
+	public boolean logIn(String username, String password) {
+		UserCredentials user = new UserCredentials(username, password);
+		boolean canConnect = false;
 		try {
-			System.out.print("Username: ");
-			String username = inFromUser.readLine();
-			System.out.print("Password: ");
-			String password = inFromUser.readLine();
-			logInDetails = new UserCredentials(username, password);
-			logInDetails.setAdmin(false);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return logInDetails;
-	}
-
-	private void run(Client client) {
-
-		UserCredentials logInData = client.getLogInDetails();
-
-		try {
-
-			boolean canConnect = false;
-			toServer.writeObject(logInData);
+			toServer.writeObject(user);
 			toServer.flush();
 			canConnect = fromServer.readBoolean();
-			while (!canConnect) {
-				System.out.println("Username or password is wrong");
-				logInData = client.getLogInDetails();
-				toServer.writeObject(logInData);
-				toServer.flush();
-				canConnect = fromServer.readBoolean();
-			}
-			System.out.println("Connected");
-
-			ListeningThread listener = new ListeningThread(client);
-			Thread t = new Thread(listener);
-			t.start();
-
-			while (true) {
-				Object response = fromServer.readObject();
-				if (response != null) {
-					Packet packet = (Packet) response;
-					System.out.println("Here is the response: " + packet.data);
-				}
-			}
-		} catch (EOFException e) {
-			System.out.println("EOF in client");
 		} catch (IOException e) {
-			System.out.println("IOExcepion in client main");
 			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		}
+		return canConnect;
+
+	}
+
+	public void send(String s) {
+		try {
+			toServer.writeObject(new Packet(s, TYPE.MESSAGE));
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void main(String[] args) {
-		Client client = new Client();
-		client.connect(HOST, PORT);
-		client.run(client);
-		client.disconnect();
+	public void startListen() {
+		listener = new ListenerThread();
+		listener.start();
 	}
 
-	class ListeningThread implements Runnable {
-
-		private volatile boolean running = true;
-
-		ListeningThread(Client client) {}
+	class ListenerThread extends Thread {
 
 		@Override
 		public void run() {
+			System.out.println("Listener Started");
 			try {
-				while (running) {
+				while (!isInterrupted()) {
+					Object response;
+					response = fromServer.readObject();
+					if (response != null) {
+						Packet packet = (Packet) response;
+						messages.add(packet);
+						System.out.println(packet.getSender() + ": " + packet.data);
 
-					System.out.println("Waiting for input: ");
-					String input = inFromUser.readLine();
-					toServer.writeObject(new Packet(input, "String"));
-					if (input.equals("\\Stop")) {
-						break;
 					}
-
 				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-
-		public void terminate() {
-			running = false;
-		}
-
 	}
 
 }
