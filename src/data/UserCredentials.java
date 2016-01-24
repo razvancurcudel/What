@@ -2,8 +2,8 @@ package data;
 
 import java.io.Serializable;
 
-import server.ListenerThread;
-import server.SenderThread;
+import server.threads.ListenerThread;
+import server.threads.SenderThread;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -12,11 +12,14 @@ import server.SenderThread;
 public class UserCredentials implements Serializable {
 
 	private static final long	serialVersionUID	= -6424896701445342406L;
-	private String				username;
-	private String				password;
-	private boolean				isAdmin;
+
+	private String				username			= null;
+	private String				password			= null;
+
 	private SenderThread		sender				= null;
 	private ListenerThread		listener			= null;
+
+	private Privilege			privilege			= Privilege.NONE;
 
 	public UserCredentials(String username, String password) {
 		this.username = username;
@@ -35,18 +38,18 @@ public class UserCredentials implements Serializable {
 		return this.password.equals(password);
 	}
 
-	public void setAdmin(boolean value) {
-		isAdmin = value;
+	public void setPrivilege(Privilege privilege) {
+		this.privilege = privilege;
 	}
 
-	public boolean isAdmin() {
-		return isAdmin;
+	public Privilege getPrivilege() {
+		return privilege;
 	}
-	
+
 	public ListenerThread getListener() {
 		return listener;
 	}
-	
+
 	public void setListener(ListenerThread listener) {
 		this.listener = listener;
 	}
@@ -58,5 +61,5 @@ public class UserCredentials implements Serializable {
 	public void setSender(SenderThread sender) {
 		this.sender = sender;
 	}
-	
+
 }

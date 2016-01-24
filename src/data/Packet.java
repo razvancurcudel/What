@@ -8,16 +8,29 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-	private static final long serialVersionUID = 8113021798904202914L;
+	private static final long	serialVersionUID	= 8113021798904202914L;
 
-	
-	public Object				data;
-	String						type;
+	public Object				data				= null;
+	private TYPE				type				= null;
+	private String				sender				= null;
 
-	public Packet(Object data, String type) {
+	public Packet(Object data, TYPE type) {
 		this.data = data;
 		this.type = type;
 	}
 
-}
+	public Packet changeSender(String name) {
+		Packet changed = new Packet(data, type);
+		changed.sender = name;
+		return changed;
+	}
 
+	public String getSender() {
+		return sender;
+	}
+
+	public TYPE getType() {
+		return type;
+	}
+
+}

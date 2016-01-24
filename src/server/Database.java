@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 import data.UserCredentials;
 
@@ -15,18 +15,17 @@ import data.UserCredentials;
 
 public class Database {
 
-	private static final String				usersFile		= "C:\\Users\\vKint\\Desktop\\Files\\users.txt";
-	private static final String				adminsFile		= "C:\\Users\\vKint\\Desktop\\Files\\admins.txt";
+	private static final String			usersFile		= "C:\\Users\\vKint\\Desktop\\Files\\users.txt";
+	private static final String			adminsFile		= "C:\\Users\\vKint\\Desktop\\Files\\admins.txt";
 
-	private static Database					instance		= null;
-	private Hashtable<String, String>		users			= null;
-	private Hashtable<String, String>		admins			= null;
-	private BufferedReader					usersReader		= null;
-	private BufferedReader					adminsReader	= null;
+	private static Database				instance		= null;
+	private Hashtable<String, String>	users			= null;
+	private Hashtable<String, String>	admins			= null;
+	private BufferedReader				usersReader		= null;
+	private BufferedReader				adminsReader	= null;
 
-	public Hashtable<String, ClientThread>	usersOn			= null;
-
-	public ArrayList<UserCredentials>		online			= null; //TODO make this private
+	private LinkedList<UserCredentials>	usersOn			= null;
+	private LinkedList<UserCredentials>	adminsOn		= null;
 
 	public static Database getInstance() {
 		if (instance == null) {
@@ -44,8 +43,8 @@ public class Database {
 		}
 		users = new Hashtable<String, String>();
 		admins = new Hashtable<String, String>();
-		usersOn = new Hashtable<String, ClientThread>();
-		online = new ArrayList<UserCredentials>();
+		usersOn = new LinkedList<UserCredentials>();
+		adminsOn = new LinkedList<UserCredentials>();
 		updateDatabase(true, true);
 	}
 
@@ -76,6 +75,14 @@ public class Database {
 
 	public Hashtable<String, String> getAdminsTable() {
 		return admins;
+	}
+
+	public LinkedList<UserCredentials> getUsersOn() {
+		return usersOn;
+	}
+
+	public LinkedList<UserCredentials> getAdminsOn() {
+		return adminsOn;
 	}
 
 	public String getUsersFile() {
