@@ -1,16 +1,28 @@
 TODO:
--implement admin actions:kick,show users..
 -sign-in as Guest
 -add user/password to binary file
--kick multiples users
--add privilege level: guest, user, admin
 -passwords must be between 8 and 32 chars long
 -crypt passwords
 -send private message
--disconnect user and close all things
--keep admins in an array
--create root user 
+-disconnect user and close all things 
 -create posibility to change password
 
 -add window listener..to disconnect when windows is closing
 -make sign-up, log-in and main screen
+
+-implement Producer-Consumer  http://javarevisited.blogspot.sg/2012/02/producer-consumer-design-pattern-with.html
+
+-make textArea scrollable
+-add windows listener to disconnect when closing the app
+
+Commands:
+\kick [user] 
+\ban [user] - keep a table with banned user and when they are try to log in send them a message
+\unban [user]
+
+
+\time - return time of server
+\help 
+\info - show info about current user
+\pm [user] send a private message to a user
+
