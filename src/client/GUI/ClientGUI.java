@@ -5,6 +5,8 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 
 import javax.swing.BorderFactory;
@@ -24,6 +26,7 @@ import javax.swing.border.Border;
 
 import client.Client;
 import data.Packet;
+import data.TYPE;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -36,15 +39,16 @@ public class ClientGUI implements Runnable {
 
 	private Client				client		= null;
 
-	public static String		toSend		= "";
-	String						incoming	= "";
+	private String				toSend		= "";
+	private TYPE				toSendType	= TYPE.MESSAGE;
+	private String				incoming	= "";
 
 	private JFrame				frame		= null;
 	private CardLayout			cl			= null;
 
-	private JPanel				content		= null;	// main panel
-	private JPanel				dataPanel	= null;	// first panel
-	private JPanel				chatPanel	= null;	// chat panel
+	private JPanel				content		= null;			// main panel
+	private JPanel				dataPanel	= null;			// first panel
+	private JPanel				chatPanel	= null;			// chat panel
 
 	// #################### DATA PANEL ####################
 	private JTabbedPane			tabs		= null;
@@ -74,6 +78,31 @@ public class ClientGUI implements Runnable {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setResizable(false);
+		frame.addWindowListener(new WindowListener(){
+
+			@Override
+			public void windowOpened(WindowEvent e) {}
+
+			@Override
+			public void windowIconified(WindowEvent e) {}
+
+			@Override
+			public void windowDeiconified(WindowEvent e) {}
+
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
+
+			@Override
+			public void windowClosed(WindowEvent e) {}
+
+			@Override
+			public void windowActivated(WindowEvent e) {}
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				client.disconnect();
+			}
+		});
 	}
 
 	private void initPanels() {
@@ -118,7 +147,12 @@ public class ClientGUI implements Runnable {
 		password = new JTextField();
 		password.setPreferredSize(new Dimension(200, 20));
 		box.add(password);
-		box.add(Box.createVerticalStrut(80));
+		box.add(Box.createVerticalStrut(40));
+
+		JLabel wrongCredentials = new JLabel("");
+		wrongCredentials.setSize(50, 20);
+		box.add(wrongCredentials);
+		box.add(Box.createVerticalStrut(20));
 
 		logInButton = new JButton("Log-In");
 		box.add(logInButton);
@@ -134,6 +168,10 @@ public class ClientGUI implements Runnable {
 					client.startListen();
 				} else {
 					// TODO set labels with user and pass wrong
+					username.setText("");
+					password.setText("");
+					username.requestFocus();
+					wrongCredentials.setText("Wrong user/password");
 				}
 
 			}
@@ -198,20 +236,30 @@ public class ClientGUI implements Runnable {
 	}
 
 	public synchronized void buildMessage(String s) {
+		if (s.startsWith("\\")) {
+			toSendType = TYPE.COMMAND;
+		}
 		toSend += s;
 	}
 
 	public synchronized void getMessage() {
 		while (!client.messages.isEmpty()) {
 			Packet message = client.messages.poll();
-			incoming += message.getSender() + ": " + (String) message.data + "\n";
+			if (message.getType() == TYPE.MESSAGE) {
+				if (message.getSender() != null) {
+					incoming += message.getSender() + ": " + (String) message.getData() + "\n";
+				} else {
+					incoming += (String) message.getData() + "\n";
+				}
+			}
 		}
 	}
 
 	private void sendMessage() {
 		if (!toSend.equals("")) {
-			client.send(toSend);
+			client.send(toSend, toSendType);
 			toSend = "";
+			toSendType = TYPE.MESSAGE;
 		}
 	}
 

@@ -1,5 +1,6 @@
 package server.threads;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -35,8 +36,8 @@ public class LogInThread implements Runnable {
 	}
 
 	// TODO use this method somehow
-	private void stop() throws IOException {
-		System.out.println("Client " + user.getUsername() + " has disconnected");
+	private void stop() {
+		System.out.println("Client with IP " + socket.getInetAddress() + " left" );
 		try {
 			if (socket != null) {
 				socket.close();
@@ -76,9 +77,9 @@ public class LogInThread implements Runnable {
 			fromClient = new ObjectInputStream(socket.getInputStream());
 
 			while (true) {
-				//TODO add action: Log In, Sign Up, Change Pass
+				// TODO add action: Log In, Sign Up, Change Pass
 				// and act adequate
-				
+
 				user = (UserCredentials) fromClient.readObject();
 				// verify if user is in users list
 				boolean isUserHere = db.getUsersTable().containsKey(user.getUsername());
@@ -109,8 +110,8 @@ public class LogInThread implements Runnable {
 			}
 
 			System.out.println(user.getUsername() + " connected at "
-					+ new SimpleDateFormat("HH:mm:ss yyyy/MM/dd").format(new Date()) + " and has IP "
-					+ socket.getInetAddress());
+					+ new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(new Date())
+					+ " and has IP " + socket.getInetAddress());
 
 			listener = new ListenerThread(dispatcher, user, fromClient);
 			sender = new SenderThread(dispatcher, user, toClient);
@@ -120,6 +121,8 @@ public class LogInThread implements Runnable {
 			listener.start();
 			sender.start();
 
+		} catch (EOFException e) {
+			stop();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {

@@ -6,6 +6,8 @@ TODO:
 -send private message
 -disconnect user and close all things 
 -create posibility to change password
+-can put user in UserCommands constructor maybe ?
+-greeting message for new logged user
 
 -add window listener..to disconnect when windows is closing
 -make sign-up, log-in and main screen
@@ -25,4 +27,6 @@ Commands:
 \help 
 \info - show info about current user
 \pm [user] send a private message to a user
+
+
 

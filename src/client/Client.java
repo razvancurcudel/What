@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -18,10 +19,11 @@ import data.UserCredentials;
 
 public class Client {
 
+	
 	public static final String	HOST		= "localhost";
 	public static final int		PORT		= 1234;
 
-	private Socket				socket		= null;
+	public Socket				socket		= null;
 	private ObjectInputStream	fromServer	= null;
 	private ObjectOutputStream	toServer	= null;
 
@@ -52,7 +54,9 @@ public class Client {
 		}
 	}
 
-	private void disconnect() {
+	// TODO use this somewhere
+	public void disconnect() {
+
 		System.out.println("Closing stuffs");
 		try {
 			if (socket != null) {
@@ -94,9 +98,9 @@ public class Client {
 
 	}
 
-	public void send(String s) {
+	public void send(String s, TYPE type) {
 		try {
-			toServer.writeObject(new Packet(s, TYPE.MESSAGE));
+			toServer.writeObject(new Packet(s, type));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -107,11 +111,10 @@ public class Client {
 		listener.start();
 	}
 
-	class ListenerThread extends Thread {
+	public class ListenerThread extends Thread {
 
 		@Override
 		public void run() {
-			System.out.println("Listener Started");
 			try {
 				while (!isInterrupted()) {
 					Object response;
@@ -119,10 +122,11 @@ public class Client {
 					if (response != null) {
 						Packet packet = (Packet) response;
 						messages.add(packet);
-						System.out.println(packet.getSender() + ": " + packet.data);
-
+						System.out.println(packet.getSender() + ": " + packet.getData());
 					}
 				}
+			} catch (SocketException e) {
+				System.out.println("Socket Exception in client");
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

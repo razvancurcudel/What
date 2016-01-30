@@ -17,7 +17,7 @@ public class Server {
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting the server");
 		ServerSocket hostServer = new ServerSocket(1234);
-		
+
 		Dispatcher dispatcher = new Dispatcher();
 		dispatcher.start();
 		

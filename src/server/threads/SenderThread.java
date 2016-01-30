@@ -7,8 +7,6 @@ import java.util.Queue;
 
 import data.Packet;
 import data.UserCredentials;
-import server.commands.CommandManager;
-import server.commands.CommandsFactory;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -16,18 +14,16 @@ import server.commands.CommandsFactory;
 
 public class SenderThread extends Thread {
 
-	Dispatcher			dispatcher	= null;
-	UserCredentials		user		= null;
-	ObjectOutputStream	toClient	= null;
-	Queue<Packet>		messages	= null;
-	CommandManager		cm			= null;
+	private Dispatcher			dispatcher	= null;
+	private UserCredentials		user		= null;
+	private ObjectOutputStream	toClient	= null;
+	private Queue<Packet>		messages	= null;
 
 	SenderThread(Dispatcher dispatcher, UserCredentials user, ObjectOutputStream toClient) {
 		this.dispatcher = dispatcher;
 		this.user = user;
 		this.toClient = toClient;
 		this.messages = new LinkedList<Packet>();
-		this.cm = CommandsFactory.getCommand(user.getPrivilege());
 	}
 
 	public synchronized Packet getMessage() throws InterruptedException {
@@ -53,7 +49,7 @@ public class SenderThread extends Thread {
 			}
 
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			user.getListener().interrupt(); // TODO modify somehow here..
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
