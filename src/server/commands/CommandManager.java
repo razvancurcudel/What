@@ -3,11 +3,11 @@ package server.commands;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 
 import data.Packet;
 import data.TYPE;
+import data.UserCredentials;
 import server.Database;
 
 /**
@@ -16,27 +16,50 @@ import server.Database;
 
 public class CommandManager {
 
-	private ObjectOutputStream	toClient	= null;
-	// private ObjectInputStream fromClient = null;
-	private Command				command		= null;
-	private Database			db			= Database.getInstance();
+	private Command		command	= null;
+	private Database	db		= Database.getInstance();
 
 	public CommandManager(UserCommands command) {
-
-//		this.toClient = toClient;
-		// this.fromClient = fromClient;
 		this.command = command;
-
 	}
 
-	public void execCommand(String action) throws IOException {
-		action = action.toLowerCase();
+	public void execCommand(UserCredentials user, String action) throws IOException {
+		action = action.toLowerCase().substring(1, action.length()); // rid of /
+
 		String[] tokens = action.split("\\s");
 		switch (tokens[0]) {
 
-			case "stop":
-				toClient.writeObject(new Packet("\\Stop", TYPE.COMMAND));
-				toClient.flush();
+			case "help":
+				command.help(user);
+				break;
+				
+			case "time":
+				command.showTime(user);
+				break;
+			
+			case "pm":
+				UserCredentials toWho = null;
+				for (UserCredentials searchedUser : db.getUsersOn()) {
+					if (searchedUser.getUsername().equalsIgnoreCase(tokens[1])) {
+						toWho = searchedUser;
+						break;
+					}
+				}
+				if (toWho == null) {
+					// XXX change message
+					user.getSender().sendMessage(new Packet("User undetected", TYPE.MESSAGE));
+					break;
+				}
+				if (toWho.equals(user)) {
+					user.getSender()
+							.sendMessage(new Packet("You can't pm to yourself", TYPE.MESSAGE));
+					break;
+				}
+				String message = "";
+				for (int i = 2; i < tokens.length; ++i) {
+					message += tokens[i] + " ";
+				}
+				command.privateMessage(user, toWho, message);
 				break;
 
 			case "update":
@@ -76,18 +99,24 @@ public class CommandManager {
 
 			case "users":
 				if (tokens.length != 2 || !tokens[1].equals("on")) {
-					System.out.println("Usage \\Users On");
+					String errorMessage = "Usage \\Users On";
+					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
 					break;
 				}
-				command.usersOn();
+				command.usersOn(user);
 				break;
 
 			case "admins":
-				if (tokens.length != 2 || !tokens[1].equals("on")) {
-					System.out.println("Usage \\Admins On");
+				if(tokens.length == 1) {
+					command.admins(user);
 					break;
 				}
-				command.adminsOn();
+				if (tokens.length != 2 || !tokens[1].equals("on")) {
+					String errorMessage = "Usage \\Admins On";
+					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
+					break;
+				}
+				command.adminsOn(user);
 				break;
 
 			case "kick":
@@ -95,12 +124,12 @@ public class CommandManager {
 					System.out.println("Usage \\kick name_of_user");
 					break;
 				}
-				command.kick(tokens[1]);
 				break;
 
 			default:
-				System.out.println("invalid command");
+				user.getSender().sendMessage(new Packet("Invalid command", TYPE.MESSAGE));
 				break;
 		}
 	}
+
 }
