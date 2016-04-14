@@ -29,8 +29,11 @@ public class ListenerThread extends Thread {
 		this.cm = CommandsFactory.getCommand(user.getPrivilege());
 	}
 
+	//TODO make listener runnable and stop somehow
+	
 	@Override
 	public void run() {
+		
 		try {
 			while (!isInterrupted()) {
 
@@ -45,7 +48,10 @@ public class ListenerThread extends Thread {
 																	// sender
 				if (packet.getType() == TYPE.MESSAGE) {
 					dispatcher.processPacket(packet);
-				} else {
+				}else if(packet.getType() == TYPE.TRIVIA) {
+					dispatcher.doTriviaStuffs(packet);
+				}
+				else {
 					cm.execCommand(user, (String) packet.getData());
 				}
 
@@ -62,9 +68,9 @@ public class ListenerThread extends Thread {
 			e.printStackTrace();
 		}
 
-		if (user.getSender().isAlive()) {
-			user.getSender().interrupt();
-		}
-		dispatcher.deleteUser(user);
+//		if (user.getSender().isAlive()) {
+//			user.getSender().interrupt();
+//		}
+		dispatcher.disconnectUser(user);
 	}
 }

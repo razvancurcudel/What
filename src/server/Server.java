@@ -6,6 +6,7 @@ import java.net.Socket;
 
 import server.threads.Dispatcher;
 import server.threads.LogInThread;
+import server.threads.TriviaBot;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -13,13 +14,19 @@ import server.threads.LogInThread;
 
 public class Server {
 
+	public static Dispatcher	dispatcher	= null;
+	public static TriviaBot		bot			= null;
+
 	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
 		System.out.println("Starting the server");
 		ServerSocket hostServer = new ServerSocket(1234);
 
-		Dispatcher dispatcher = new Dispatcher();
-		dispatcher.start();
+		dispatcher = new Dispatcher();
+		new Thread(dispatcher).start();
+		bot = new TriviaBot();
+		bot.start();
+		
 		
 		while (true) {
 			System.out.println("Waiting for clients..");

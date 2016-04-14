@@ -23,7 +23,7 @@ public class Client {
 	public static final String	HOST		= "localhost";
 	public static final int		PORT		= 1234;
 
-	public Socket				socket		= null;
+	private Socket				socket		= null;
 	private ObjectInputStream	fromServer	= null;
 	private ObjectOutputStream	toServer	= null;
 

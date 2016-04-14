@@ -31,19 +31,19 @@ public class UserCommands implements Command {
 				+ "\\admins on - show which admins are online\n"
 				+ "\\users on - show which users are online\n"
 				+ "\\pm [user] - send a private message to user\n";
-		user.getSender().sendMessage(new Packet(helpMessage, TYPE.MESSAGE));
+//		user.getSender().sendMessage(new Packet(helpMessage, TYPE.MESSAGE));
 	}
 
 	@Override
 	public void info(UserCredentials user) throws IOException {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public void showTime(UserCredentials user) throws IOException {
 		String message = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(new Date());
-		user.getSender().sendMessage(new Packet(message, TYPE.MESSAGE));
+//		user.getSender().sendMessage(new Packet(message, TYPE.MESSAGE));
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class UserCommands implements Command {
 				break;
 			}
 		}
-		user.getSender().sendMessage(new Packet(toSend, TYPE.MESSAGE));
+//		user.getSender().sendMessage(new Packet(toSend, TYPE.MESSAGE));
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class UserCommands implements Command {
 				users += userX.getUsername() + ", ";
 			}
 		}
-		user.getSender().sendMessage(new Packet(users, TYPE.MESSAGE));
+//		user.getSender().sendMessage(new Packet(users, TYPE.MESSAGE));
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class UserCommands implements Command {
 				admins += admin.getUsername() + ", ";
 			}
 		}
-		user.getSender().sendMessage(new Packet(admins, TYPE.MESSAGE));
+//		user.getSender().sendMessage(new Packet(admins, TYPE.MESSAGE));
 	}
 
 	@Override
@@ -107,8 +107,8 @@ public class UserCommands implements Command {
 		Packet packet1 = new Packet("PM to " + user2.getUsername() + ": " + message, TYPE.MESSAGE);
 		Packet packet2 = new Packet("PM from " + user1.getUsername() + ": " + message,
 				TYPE.MESSAGE);
-		user1.getSender().sendMessage(packet1);
-		user2.getSender().sendMessage(packet2);
+//		user1.getSender().sendMessage(packet1);
+//		user2.getSender().sendMessage(packet2);
 	}
 
 	@Override

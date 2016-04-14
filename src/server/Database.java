@@ -15,17 +15,17 @@ import data.UserCredentials;
 
 public class Database {
 
-	private static final String			usersFile		= "C:\\Users\\vKint\\Desktop\\Files\\users.txt";
-	private static final String			adminsFile		= "C:\\Users\\vKint\\Desktop\\Files\\admins.txt";
+	private static final String					usersFile		= "C:\\Users\\vKint\\Desktop\\Files\\users.txt";
+	private static final String					adminsFile		= "C:\\Users\\vKint\\Desktop\\Files\\admins.txt";
 
-	private static Database				instance		= null;
-	private Hashtable<String, String>	users			= null;
-	private Hashtable<String, String>	admins			= null;
-	private BufferedReader				usersReader		= null;
-	private BufferedReader				adminsReader	= null;
+	private static Database						instance		= null;
+	private Hashtable<String, String>			users			= null;
+	private Hashtable<String, String>			admins			= null;
+	private BufferedReader						usersReader		= null;
+	private BufferedReader						adminsReader	= null;
 
-	private LinkedList<UserCredentials>	usersOn			= null;
-	private LinkedList<UserCredentials>	adminsOn		= null;
+	private static LinkedList<UserCredentials>	usersOn			= null;
+	private LinkedList<UserCredentials>			adminsOn		= null;
 
 	public static Database getInstance() {
 		if (instance == null) {

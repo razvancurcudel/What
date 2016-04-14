@@ -5,5 +5,5 @@ package data;
  */
 
 public enum TYPE {
-	MESSAGE, COMMAND;
+	MESSAGE, COMMAND, TRIVIA;
 }

@@ -25,7 +25,6 @@ public class LogInThread implements Runnable {
 	private UserCredentials		user		= null;
 
 	private ListenerThread		listener	= null;
-	private SenderThread		sender		= null;
 	private Dispatcher			dispatcher	= null;
 
 	private Database			db			= Database.getInstance();
@@ -35,7 +34,6 @@ public class LogInThread implements Runnable {
 		this.dispatcher = dispatcher;
 	}
 
-	// TODO use this method somehow
 	private void stop() {
 		System.out.println("Client with IP " + socket.getInetAddress() + " left" );
 		try {
@@ -94,13 +92,13 @@ public class LogInThread implements Runnable {
 						toClient.flush();
 						if (user.getUsername().equals("root")) {
 							user.setPrivilege(Privilege.ROOT);
-							dispatcher.addUser(user);
+							dispatcher.connectUser(user);
 						} else if (db.getAdminsTable().containsKey(user.getUsername())) {
 							user.setPrivilege(Privilege.ADMIN);
-							dispatcher.addUser(user);
+							dispatcher.connectUser(user);
 						} else {
 							user.setPrivilege(Privilege.USER);
-							dispatcher.addUser(user);
+							dispatcher.connectUser(user);
 						}
 						break;
 					}
@@ -114,15 +112,15 @@ public class LogInThread implements Runnable {
 					+ " and has IP " + socket.getInetAddress());
 
 			listener = new ListenerThread(dispatcher, user, fromClient);
-			sender = new SenderThread(dispatcher, user, toClient);
+//			sender = new SenderThread(dispatcher, user, toClient);
 
 			user.setListener(listener);
-			user.setSender(sender);
+			user.setSender(toClient);
 			listener.start();
-			sender.start();
+//			sender.start();
 
 		} catch (EOFException e) {
-			stop();
+			stop(); // XXX is ok this here ?
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {

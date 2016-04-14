@@ -1,9 +1,9 @@
 package data;
 
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import server.threads.ListenerThread;
-import server.threads.SenderThread;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -16,8 +16,10 @@ public class UserCredentials implements Serializable {
 	private String				username			= null;
 	private String				password			= null;
 
-	private SenderThread		sender				= null;
+//	private SenderThread		sender				= null;
 	private ListenerThread		listener			= null;
+
+	private ObjectOutputStream	sender				= null;
 
 	private Privilege			privilege			= Privilege.NONE;
 
@@ -54,11 +56,11 @@ public class UserCredentials implements Serializable {
 		this.listener = listener;
 	}
 
-	public SenderThread getSender() {
+	public ObjectOutputStream getSender() {
 		return sender;
 	}
 
-	public void setSender(SenderThread sender) {
+	public void setSender(ObjectOutputStream sender) {
 		this.sender = sender;
 	}
 

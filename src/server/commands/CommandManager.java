@@ -9,6 +9,7 @@ import data.Packet;
 import data.TYPE;
 import data.UserCredentials;
 import server.Database;
+import server.Server;
 
 /**
  * @author Curcudel Ioan-Razvan
@@ -47,12 +48,14 @@ public class CommandManager {
 				}
 				if (toWho == null) {
 					// XXX change message
-					user.getSender().sendMessage(new Packet("User undetected", TYPE.MESSAGE));
+//					user.getSender().sendMessage(new Packet("User undetected", TYPE.MESSAGE));
+					Server.dispatcher.sendToUser(user, new Packet("User undetected", TYPE.MESSAGE));
 					break;
 				}
 				if (toWho.equals(user)) {
-					user.getSender()
-							.sendMessage(new Packet("You can't pm to yourself", TYPE.MESSAGE));
+//					user.getSender()
+//							.sendMessage(new Packet("You can't pm to yourself", TYPE.MESSAGE));
+					Server.dispatcher.sendToUser(user, new Packet("You can't pm to yourself", TYPE.MESSAGE));
 					break;
 				}
 				String message = "";
@@ -100,7 +103,8 @@ public class CommandManager {
 			case "users":
 				if (tokens.length != 2 || !tokens[1].equals("on")) {
 					String errorMessage = "Usage \\Users On";
-					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
+//					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
+					Server.dispatcher.sendToUser(user, new Packet((errorMessage), TYPE.MESSAGE));
 					break;
 				}
 				command.usersOn(user);
@@ -113,7 +117,8 @@ public class CommandManager {
 				}
 				if (tokens.length != 2 || !tokens[1].equals("on")) {
 					String errorMessage = "Usage \\Admins On";
-					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
+//					user.getSender().sendMessage(new Packet((errorMessage), TYPE.MESSAGE));
+					Server.dispatcher.sendToUser(user, new Packet((errorMessage), TYPE.MESSAGE));
 					break;
 				}
 				command.adminsOn(user);
@@ -127,7 +132,8 @@ public class CommandManager {
 				break;
 
 			default:
-				user.getSender().sendMessage(new Packet("Invalid command", TYPE.MESSAGE));
+//				user.getSender().sendMessage(new Packet("Invalid command", TYPE.MESSAGE));
+				Server.dispatcher.sendToUser(user, new Packet("Invalid command", TYPE.MESSAGE));
 				break;
 		}
 	}

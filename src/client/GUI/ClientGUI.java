@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,39 +35,46 @@ import data.TYPE;
 
 public class ClientGUI implements Runnable {
 
-	private static final int	WIDTH		= 540;
-	private static final int	HEIGHT		= 400;
+	private static final int	WIDTH			= 540;
+	private static final int	HEIGHT			= 400;
 
-	private Client				client		= null;
+	private Client				client			= null;
 
-	private String				toSend		= "";
-	private TYPE				toSendType	= TYPE.MESSAGE;
-	private String				incoming	= "";
+	private String				toSend			= "";
+	private TYPE				toSendType		= TYPE.MESSAGE;
+	private String				incoming		= "";
+	private String				incomingTrivia	= "";
 
-	private JFrame				frame		= null;
-	private CardLayout			cl			= null;
+	private JFrame				frame			= null;
+	private CardLayout			cl				= null;
 
-	private JPanel				content		= null;			// main panel
-	private JPanel				dataPanel	= null;			// first panel
-	private JPanel				chatPanel	= null;			// chat panel
+	private JPanel				content			= null;			// main panel
+	private JPanel				dataPanel		= null;			// first panel
+	private JPanel				chatPanel		= null;			// chat panel
 
 	// #################### DATA PANEL ####################
-	private JTabbedPane			tabs		= null;
+	private JTabbedPane			tabs			= null;
 
 	// ~~~~~~~~~~~~~~~~~~~~~ LogInTab ~~~~~~~~~~~~~~~~~~~~~
-	private JPanel				logInTab	= null;
-	private JTextField			username;
-	private JTextField			password;
-	private JButton				logInButton;
+	private JPanel				logInTab		= null;
+	private JTextField			username		= null;
+	private JTextField			password		= null;
+	private JButton				logInButton		= null;
 
-	// ~~~~~~~~~~~~~~~~~~~~~ SignUpTab ~~~~~~~~~~~~~~~~~~~~~
-	private JPanel				signUpTab	= null;
+	// ~~~~~~~~~~~~~~~~~~~~~ SignUpTab ~~~~~~~~~~~~~~~~~~~~
+	private JPanel				signUpTab		= null;
 
 	// private JPanel changePassTab = null; //TODO change pass
 
 	// #################### CHAT PANEL ####################
-	private JTextArea			textArea;
-	private JTextField			input;
+	private JTextArea			chatTextArea	= null;
+	private JTextField			chatInput		= null;
+	private JButton				switchToTrivia	= null;
+
+	// ################## TRIVIA DIALOG ###################
+	private JDialog				triviaDialog	= null;
+	private JTextArea			triviaTextArea	= null;
+	private JTextField			triviaInput		= null;
 
 	public ClientGUI(Client client) {
 		this.client = client;
@@ -164,7 +172,7 @@ public class ClientGUI implements Runnable {
 				if (connected) {
 					dataPanel.setVisible(false);
 					chatPanel.setVisible(true);
-					input.requestFocus();
+					chatInput.requestFocus();
 					client.startListen();
 				} else {
 					// TODO set labels with user and pass wrong
@@ -186,30 +194,76 @@ public class ClientGUI implements Runnable {
 	private JPanel createChatPanel() {
 		JPanel toReturnChat = new JPanel();
 
-		textArea = new JTextArea();
-		textArea.setPreferredSize(new Dimension(300, 300));
-		textArea.setEditable(false);
-		textArea.setLineWrap(true);
-		textArea.setWrapStyleWord(true);
-		toReturnChat.add(textArea);
+		chatTextArea = new JTextArea();
+		chatTextArea.setPreferredSize(new Dimension(300, 300));
+		chatTextArea.setEditable(false);
+		chatTextArea.setLineWrap(true);
+		chatTextArea.setWrapStyleWord(true);
+		toReturnChat.add(chatTextArea);
 
-		input = new JTextField();
-		input.setPreferredSize(new Dimension(200, 20));
-		input.addActionListener(new ActionListener(){
+		chatInput = new JTextField();
+		chatInput.setPreferredSize(new Dimension(200, 20));
+		chatInput.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String text = input.getText();
+				String text = chatInput.getText();
 				if (!text.equals("")) {
-					buildMessage(text);
+					if (text.startsWith("\\")) {
+						buildMessage(text, TYPE.COMMAND);
+					} else
+						buildMessage(text, TYPE.MESSAGE);
 				}
-				input.setText("");
+				chatInput.setText("");
 			}
 		});
-		toReturnChat.add(input);
+		toReturnChat.add(chatInput);
+		
+		triviaDialog = createTriviaDialog();
+		
+		switchToTrivia = new JButton("trivia");
+		switchToTrivia.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				triviaDialog.setVisible(true);
+			}
+		});
+		toReturnChat.add(switchToTrivia);
 
 		return toReturnChat;
 
+	}
+
+	
+	private JDialog createTriviaDialog() {
+		JDialog dialog = new JDialog(frame, "Trivia", false);
+		JPanel panel = new JPanel();
+		dialog.setLocationRelativeTo(chatPanel);
+		dialog.setSize(500, 350);
+		triviaTextArea = new JTextArea();
+		triviaTextArea.setPreferredSize(new Dimension(250, 250));
+		triviaTextArea.setEditable(false);
+		triviaTextArea.setLineWrap(true);
+		triviaTextArea.setWrapStyleWord(true);
+		panel.add(triviaTextArea);
+
+		triviaInput = new JTextField();
+		triviaInput.setPreferredSize(new Dimension(200, 20));
+		triviaInput.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String text = triviaInput.getText();
+				if (!text.equals(""))
+					buildMessage(text, TYPE.TRIVIA);
+				triviaInput.setText("");
+			}
+		});
+		panel.add(triviaInput);
+
+		dialog.add(panel);
+		return dialog;
 	}
 
 	private void initGUI() {
@@ -235,22 +289,25 @@ public class ClientGUI implements Runnable {
 		frame.setVisible(true);
 	}
 
-	public synchronized void buildMessage(String s) {
-		if (s.startsWith("\\")) {
-			toSendType = TYPE.COMMAND;
-		}
+	public synchronized void buildMessage(String s, TYPE type) {
 		toSend += s;
+		toSendType = type;
 	}
 
 	public synchronized void getMessage() {
 		while (!client.messages.isEmpty()) {
 			Packet message = client.messages.poll();
 			if (message.getType() == TYPE.MESSAGE) {
+				// if server send the message, sender is null
+
 				if (message.getSender() != null) {
 					incoming += message.getSender() + ": " + (String) message.getData() + "\n";
 				} else {
 					incoming += (String) message.getData() + "\n";
 				}
+			}
+			if (message.getType() == TYPE.TRIVIA) {
+				incomingTrivia += "Trivia: " + (String) message.getData();
 			}
 		}
 	}
@@ -265,8 +322,10 @@ public class ClientGUI implements Runnable {
 
 	@Override
 	public void run() {
-		textArea.append(incoming);
+		chatTextArea.append(incoming);
 		incoming = "";
+		triviaTextArea.append(incomingTrivia);
+		incomingTrivia = "";
 	}
 
 	public static void main(String[] args) throws IOException {
